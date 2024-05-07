@@ -1,31 +1,14 @@
 import mongoose from 'mongoose'
 import { PasswordManager } from '../services/password'
 
-// TypeScript and mongoose does not go hand in hand
-// and that is why we have to change the way we create a new User
-// instead of calling new User, we will use static build method which is type aware
-
 // an interface that describes the properties
 // that are required to create a new User
-interface UserAttrs {
+export interface UserAttrs {
   email: string
   password: string
 }
 
-// an interface that describes the properties
-// that a User model has
-interface UserModel extends mongoose.Model<UserDoc> {
-  build(attrs: UserAttrs): UserDoc
-}
-
-// an interface that describes the properties
-// that a User document has
-interface UserDoc extends mongoose.Document {
-  email: string
-  password: string
-}
-
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<UserAttrs>({
   email: {
     type: String,
     required: true
@@ -57,10 +40,6 @@ userSchema.pre('save', async function (done) {
   done()
 })
 
-userSchema.statics.build = (attrs: UserAttrs) => {
-  return new User(attrs)
-}
-
-const User = mongoose.model<UserDoc, UserModel>('User', userSchema)
+const User = mongoose.model<UserAttrs>('User', userSchema)
 
 export { User }
